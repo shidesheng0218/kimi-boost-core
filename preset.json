@@ -1,0 +1,38 @@
+{
+  "id": "core",
+  "name": "核心护栏",
+  "description": "任何项目都该装的最小保险:拦截直推 main/master、危险 shell 命令(rm -rf /、mkfs、dd 写盘、curl|sh)、写入硬编码密钥。全部 fail-open。",
+  "tags": [
+    "core",
+    "guardrails",
+    "security",
+    "cross-stack"
+  ],
+  "version": "1.0.0",
+  "hooks": [
+    {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "script": "protect-main.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "script": "block-dangerous.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Write",
+      "script": "secret-scan.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Edit",
+      "script": "secret-scan.mjs",
+      "timeout": 5
+    }
+  ]
+}

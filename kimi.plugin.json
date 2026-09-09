@@ -1,0 +1,21 @@
+{
+  "name": "core",
+  "version": "1.0.0",
+  "description": "核心护栏:拦直推主干、拦危险 shell、拦密钥写入。任何项目建议安装。",
+  "keywords": ["core", "guardrails", "security", "safety"],
+  "license": "MIT",
+  "interface": {
+    "displayName": "核心护栏",
+    "shortDescription": "Baseline guardrails: protect main, block dangerous shell, scan secrets",
+    "developerName": "kimi-boost",
+    "websiteURL": "https://github.com/shidesheng0218/kimi-boost"
+  },
+  "skills": "./skills/",
+  "skillInstructions": "本 skill 为通用默认安全习惯,适用于所有项目,无需按技术栈门控。",
+  "hooks": [
+    { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/protect-main.mjs", "timeout": 5 },
+    { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/block-dangerous.mjs", "timeout": 5 },
+    { "event": "PreToolUse", "matcher": "Write", "command": "node ./hooks/secret-scan.mjs", "timeout": 5 },
+    { "event": "PreToolUse", "matcher": "Edit", "command": "node ./hooks/secret-scan.mjs", "timeout": 5 }
+  ]
+}
