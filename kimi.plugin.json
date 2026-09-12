@@ -1,12 +1,12 @@
 {
   "name": "core",
-  "version": "1.0.0",
-  "description": "核心护栏:拦直推主干、拦危险 shell、拦密钥写入。任何项目建议安装。",
+  "version": "1.1.0",
+  "description": "核心护栏:拦直推主干、危险 shell、密钥写入、凭证读取、丢弃工作区的 git 操作。任何项目建议安装。",
   "keywords": ["core", "guardrails", "security", "safety"],
   "license": "MIT",
   "interface": {
     "displayName": "核心护栏",
-    "shortDescription": "Baseline guardrails: protect main, block dangerous shell, scan secrets",
+    "shortDescription": "Baseline guardrails: protect main, block dangerous shell, scan secrets, shield credentials",
     "developerName": "kimi-boost",
     "websiteURL": "https://github.com/shidesheng0218/kimi-boost"
   },
@@ -15,7 +15,10 @@
   "hooks": [
     { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/protect-main.mjs", "timeout": 5 },
     { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/block-dangerous.mjs", "timeout": 5 },
+    { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/git-destructive.mjs", "timeout": 5 },
     { "event": "PreToolUse", "matcher": "Write", "command": "node ./hooks/secret-scan.mjs", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Edit", "command": "node ./hooks/secret-scan.mjs", "timeout": 5 }
+    { "event": "PreToolUse", "matcher": "Edit", "command": "node ./hooks/secret-scan.mjs", "timeout": 5 },
+    { "event": "PreToolUse", "matcher": "Read", "command": "node ./hooks/protect-credentials.mjs --tool=read", "timeout": 5 },
+    { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/protect-credentials.mjs --tool=bash", "timeout": 5 }
   ]
 }
