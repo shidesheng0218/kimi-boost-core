@@ -35,6 +35,18 @@ function logBlock(name, tool, preview) {
     /* 日志失败不影响拦截 */
   }
 }
+
+/** 统一收尾:block 模式 exit 2;warn 模式记录+提示但放行 */
+function blockOrWarn(name, tool, preview, message) {
+  logBlock(name, tool, preview);
+  const mode = guardsConfig().modes?.[name];
+  if (mode === "warn") {
+    console.error(`[kimi-boost][warn] ${message} (warn 模式:已放行)`);
+    process.exit(0);
+  }
+  console.error(`[kimi-boost] ${message} — false positive? run: kimi-boost guard --disable ${name}`);
+  process.exit(2);
+}
 // ---- end guard runtime ----
 
 let input = "";
@@ -53,7 +65,7 @@ process.stdin.on("end", () => {
       /(^|[\s|;&])dd\s+if=.*of=\/dev\/sd/,
       /curl\s+.*\|\s*(ba)?sh/,
     ];
-    // 用户自定义拦截模式(guards.json 的 customPatterns,由 kimi-boost guard add-pattern 写入)
+    // 用户自定义拦截模式(guards.json 的 customPatterns,由 kimi-boost guard --add-pattern 写入)
     for (const p of guardsConfig().customPatterns ?? []) {
       try {
         blocked.push(new RegExp(p));
@@ -63,9 +75,7 @@ process.stdin.on("end", () => {
     }
     const hit = blocked.find((re) => re.test(command));
     if (hit) {
-      logBlock(GUARD_NAME, "Bash", command);
-      console.error(`[kimi-boost] Blocked dangerous shell command (${hit})`);
-      process.exit(2);
+      blockOrWarn(GUARD_NAME, "Bash", command, `Blocked dangerous shell command (${hit})`);
     }
   } catch {
     /* fail-open */

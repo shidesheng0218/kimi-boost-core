@@ -8,14 +8,18 @@ const HOME = process.env.KIMI_BOOST_HOME ?? join(homedir(), ".kimi-boost");
 const GUARDS_FILE = join(HOME, "guards.json");
 const GUARD_LOG = join(HOME, "guard-log.jsonl");
 
-function guardDisabled(name) {
+function guardsConfig() {
   try {
-    if (!existsSync(GUARDS_FILE)) return false;
-    const cfg = JSON.parse(readFileSync(GUARDS_FILE, "utf8"));
-    return Array.isArray(cfg.disabled) && cfg.disabled.includes(name);
+    if (!existsSync(GUARDS_FILE)) return {};
+    return JSON.parse(readFileSync(GUARDS_FILE, "utf8"));
   } catch {
-    return false;
+    return {};
   }
+}
+
+function guardDisabled(name) {
+  const cfg = guardsConfig();
+  return Array.isArray(cfg.disabled) && cfg.disabled.includes(name);
 }
 
 function logBlock(name, tool, preview) {
@@ -30,6 +34,18 @@ function logBlock(name, tool, preview) {
   } catch {
     /* 日志失败不影响拦截 */
   }
+}
+
+/** 统一收尾:block 模式 exit 2;warn 模式记录+提示但放行 */
+function blockOrWarn(name, tool, preview, message) {
+  logBlock(name, tool, preview);
+  const mode = guardsConfig().modes?.[name];
+  if (mode === "warn") {
+    console.error(`[kimi-boost][warn] ${message} (warn 模式:已放行)`);
+    process.exit(0);
+  }
+  console.error(`[kimi-boost] ${message} — false positive? run: kimi-boost guard --disable ${name}`);
+  process.exit(2);
 }
 // ---- end guard runtime ----
 
@@ -56,13 +72,13 @@ process.stdin.on("end", () => {
     ];
     const hit = patterns.find((p) => p.re.test(content));
     if (hit) {
-      // 注意:日志只记命中的模式名,绝不记录密钥内容本身
-      logBlock(GUARD_NAME, "Write/Edit", `pattern:${hit.name}`);
-      console.error(
-        `[kimi-boost] Blocked: content looks like a hardcoded secret (${hit.name}). ` +
-          "Move it to an env var or a secrets manager instead of writing it into a file.",
+      // 日志只记命中的模式名,绝不记录密钥内容本身
+      blockOrWarn(
+        GUARD_NAME,
+        "Write/Edit",
+        `pattern:${hit.name}`,
+        `Blocked: content looks like a hardcoded secret (${hit.name}). Move it to an env var or a secrets manager instead of writing it into a file.`,
       );
-      process.exit(2);
     }
   } catch {
     /* fail-open */
