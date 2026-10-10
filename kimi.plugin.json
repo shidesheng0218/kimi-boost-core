@@ -1,8 +1,13 @@
 {
   "name": "core",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "核心护栏:拦直推主干、危险命令、密钥写入/读取、丢弃工作区操作、手改 lockfile,并保护护栏自身。任何项目建议安装。",
-  "keywords": ["core", "guardrails", "security", "safety"],
+  "keywords": [
+    "core",
+    "guardrails",
+    "security",
+    "safety"
+  ],
   "license": "MIT",
   "interface": {
     "displayName": "核心护栏",
@@ -13,20 +18,93 @@
   "skills": "./skills/",
   "skillInstructions": "本 skill 为通用默认安全习惯,适用于所有项目,无需按技术栈门控。",
   "hooks": [
-    { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/protect-main.mjs", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/block-dangerous.mjs", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/git-destructive.mjs", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Write", "command": "node ./hooks/secret-scan.mjs", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Edit", "command": "node ./hooks/secret-scan.mjs", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Read", "command": "node ./hooks/protect-credentials.mjs --tool=read", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/protect-credentials.mjs --tool=bash", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Write", "command": "node ./hooks/protect-guards.mjs --tool=write", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Edit", "command": "node ./hooks/protect-guards.mjs --tool=edit", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/protect-guards.mjs --tool=bash", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Write", "command": "node ./hooks/protect-paths.mjs", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Edit", "command": "node ./hooks/protect-paths.mjs", "timeout": 5 },
-    { "event": "PreToolUse", "matcher": "Bash", "command": "node ./hooks/protect-paths.mjs --tool=bash", "timeout": 5 },
-    { "event": "PostToolUse", "command": "node ./hooks/secret-scan-post.mjs", "timeout": 5 },
-    { "event": "PostToolUse", "command": "node ./hooks/injection-scan.mjs", "timeout": 5 }
+    {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "command": "node ./hooks/protect-main.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "command": "node ./hooks/block-dangerous.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "command": "node ./hooks/git-destructive.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Write",
+      "command": "node ./hooks/secret-scan.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Edit",
+      "command": "node ./hooks/secret-scan.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Read",
+      "command": "node ./hooks/protect-credentials.mjs --tool=read",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "command": "node ./hooks/protect-credentials.mjs --tool=bash",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Write",
+      "command": "node ./hooks/protect-guards.mjs --tool=write",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Edit",
+      "command": "node ./hooks/protect-guards.mjs --tool=edit",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "command": "node ./hooks/protect-guards.mjs --tool=bash",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Write",
+      "command": "node ./hooks/protect-paths.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Edit",
+      "command": "node ./hooks/protect-paths.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "command": "node ./hooks/protect-paths.mjs --tool=bash",
+      "timeout": 5
+    },
+    {
+      "event": "PostToolUse",
+      "command": "node ./hooks/secret-scan-post.mjs",
+      "timeout": 5
+    },
+    {
+      "event": "PostToolUse",
+      "command": "node ./hooks/injection-scan.mjs",
+      "timeout": 5
+    }
   ]
 }

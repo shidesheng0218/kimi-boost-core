@@ -8,7 +8,7 @@
     "security",
     "cross-stack"
   ],
-  "version": "1.3.0",
+  "version": "1.3.1",
   "denyRules": [
     "Read(~/.ssh/**)",
     "Read(~/.aws/**)",
@@ -63,35 +63,45 @@
       "matcher": "Read",
       "script": "protect-credentials.mjs",
       "timeout": 5,
-      "args": ["--tool=read"]
+      "args": [
+        "--tool=read"
+      ]
     },
     {
       "event": "PreToolUse",
       "matcher": "Bash",
       "script": "protect-credentials.mjs",
       "timeout": 5,
-      "args": ["--tool=bash"]
+      "args": [
+        "--tool=bash"
+      ]
     },
     {
       "event": "PreToolUse",
       "matcher": "Write",
       "script": "protect-guards.mjs",
       "timeout": 5,
-      "args": ["--tool=write"]
+      "args": [
+        "--tool=write"
+      ]
     },
     {
       "event": "PreToolUse",
       "matcher": "Edit",
       "script": "protect-guards.mjs",
       "timeout": 5,
-      "args": ["--tool=edit"]
+      "args": [
+        "--tool=edit"
+      ]
     },
     {
       "event": "PreToolUse",
       "matcher": "Bash",
       "script": "protect-guards.mjs",
       "timeout": 5,
-      "args": ["--tool=bash"]
+      "args": [
+        "--tool=bash"
+      ]
     },
     {
       "event": "PreToolUse",
@@ -110,7 +120,9 @@
       "matcher": "Bash",
       "script": "protect-paths.mjs",
       "timeout": 5,
-      "args": ["--tool=bash"]
+      "args": [
+        "--tool=bash"
+      ]
     },
     {
       "event": "PostToolUse",

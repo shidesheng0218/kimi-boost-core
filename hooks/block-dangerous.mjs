@@ -1,12 +1,13 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-// ---- kimi-boost guard runtime(各守卫脚本内联同一份逻辑) ----
+// ---- kimi-boost guard runtime(GENERATED:改 src/hooks-runtime/ 后运行 npm run build:hooks) ----
 const GUARD_NAME = "block-dangerous";
 const HOME = process.env.KIMI_BOOST_HOME ?? join(homedir(), ".kimi-boost");
 const GUARDS_FILE = join(HOME, "guards.json");
 const GUARD_LOG = join(HOME, "guard-log.jsonl");
+const GUARD_LOG_MAX_BYTES = 256 * 1024;
 
 function guardsConfig() {
   try {
@@ -26,13 +27,15 @@ function logBlock(name, tool, preview) {
   try {
     mkdirSync(HOME, { recursive: true });
     const line = JSON.stringify({ ts: new Date().toISOString(), guard: name, tool, preview: String(preview ?? "").slice(0, 40) });
-    let lines = [];
-    if (existsSync(GUARD_LOG)) lines = readFileSync(GUARD_LOG, "utf8").split("\n").filter(Boolean);
-    lines.push(line);
-    if (lines.length > 1000) lines = lines.slice(-1000);
-    writeFileSync(GUARD_LOG, lines.join("\n") + "\n");
+    // 超限时轮转为 .1(rename 原子);随后单行 append,并行 hook 不会互相覆盖
+    try {
+      if (statSync(GUARD_LOG).size > GUARD_LOG_MAX_BYTES) renameSync(GUARD_LOG, GUARD_LOG + ".1");
+    } catch {
+      /* 日志文件还不存在 */
+    }
+    appendFileSync(GUARD_LOG, line + "\n");
   } catch {
-    /* 日志失败不影响拦截 */
+    /* 日志失败不影响判定 */
   }
 }
 
@@ -61,9 +64,18 @@ process.stdin.on("end", () => {
       /(^|[\s|;&])rm(\s+-[a-zA-Z]*[rRfF][a-zA-Z]*)+\s+(?:\/\*?|\*|\.\.?\/?)(\s|$)/,
       // rm -rf 路径里含未加引号的 $变量(变量为空时会误删,如 rm -rf $HOME 的悲剧)
       /(^|[\s|;&])rm(\s+-[a-zA-Z]*[rRfF][a-zA-Z]*)+\s+[^|;&]*\$\w+/,
+      // sudo + 危险命令
+      /(^|[\s|;&])sudo\s+(rm\s+-[a-zA-Z]*[rRfF]|mkfs|dd|chmod\s+-R\s+777)/,
       /(^|[\s|;&])mkfs/,
       /(^|[\s|;&])dd\s+if=.*of=\/dev\/sd/,
-      /curl\s+.*\|\s*(ba)?sh/,
+      // 管道执行远程脚本
+      /(curl|wget)\s+.*\|\s*(ba)?sh/,
+      // git 破坏性操作
+      /(^|[\s|;&])git\s+(clean\s+-[a-zA-Z]*f|reset\s+--hard)/,
+      // 递归 chmod 777
+      /(^|[\s|;&])chmod\s+-[a-zA-Z]*R[a-zA-Z]*\s+777/,
+      // eval + base64(常见的混淆注入)
+      /eval.*base64/,
     ];
     // 用户自定义拦截模式(guards.json 的 customPatterns,由 kimi-boost guard --add-pattern 写入)
     for (const p of guardsConfig().customPatterns ?? []) {
