@@ -82,7 +82,8 @@ function tokenize(cmd) {
     const c = cmd[i];
     if (quote) {
       if (c === quote) quote = null;
-      else if (c === "\\" && quote === '"' && i + 1 < cmd.length) tok += cmd[++i];
+      // 双引号内:只有 \" 和 \\ 是转义,其余 \ 保留原样(Windows 路径如 C:\Users\...)
+      else if (c === "\\" && quote === '"' && i + 1 < cmd.length && (cmd[i + 1] === '"' || cmd[i + 1] === "\\")) tok += cmd[++i];
       else tok += c;
       continue;
     }
